@@ -1,0 +1,7 @@
+# Bron-audio (WAV) niet meecommitten: te groot voor GitHub (limiet 100 MB per bestand).
+# Alleen de omgezette .mp3-bestanden horen in de repo.
+*.wav
+
+# Systeembestanden
+.DS_Store
+Thumbs.db
