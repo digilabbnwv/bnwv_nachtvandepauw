@@ -284,6 +284,33 @@
     font-size: clamp(1.8rem, 5vh, 3rem);
     font-weight: 800;
   }
+  .unlock .ver {
+    position: absolute;
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+    font-size: 0.9rem;
+    font-weight: 700;
+    opacity: 0.85;
+  }
+  #js-alive { color: #FFD166; }        /* geel = JS nog niet gestart */
+  #js-alive.ok { color: #B9F6CA; }     /* groen = JS draait */
+
+  /* Diagnose-scherm bij uitgeschakelde JavaScript */
+  .noscript-msg {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: var(--color-secondary);
+    color: var(--color-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    padding: var(--space-8);
+    text-align: center;
+  }
+  .noscript-msg h2 { font-size: clamp(1.8rem, 5vh, 3rem); font-weight: 800; }
+  .noscript-msg p  { font-size: clamp(1.1rem, 3vh, 1.5rem); font-weight: 700; max-width: 28ch; }
   .unlock p {
     font-size: clamp(1.1rem, 3vh, 1.6rem);
     font-weight: 700;
@@ -302,6 +329,16 @@
        Elk fragment heeft een `label` (tekst op de knop) en een `bestand`
        (de MP3 die naast index.html in dezelfde map staat).
   ====================================================================== -->
+
+  <!-- Diagnose: dit scherm verschijnt ALLEEN als JavaScript uitstaat
+       (bijv. geblokkeerd via een MDM-/Safari-restrictie). -->
+  <noscript>
+    <div class="noscript-msg">
+      <h2>JavaScript staat uit</h2>
+      <p>Deze pagina heeft JavaScript nodig. Zet JavaScript aan in Safari
+         (of in het MDM-/JAMF-profiel) en laad de pagina opnieuw.</p>
+    </div>
+  </noscript>
 
   <div class="app">
     <header>
@@ -329,6 +366,7 @@
     </div>
     <h2>Tik om te starten</h2>
     <p>Raak het scherm aan om het geluid aan te zetten</p>
+    <p class="ver">versie 3 &middot; <span id="js-alive">JavaScript?</span></p>
   </div>
 
 <script>
@@ -364,6 +402,10 @@
   var stopBtn    = document.getElementById('stop');
   var unlockEl   = document.getElementById('unlock');
   var knoppen    = [];
+
+  /* Diagnose: bewijst dat JavaScript daadwerkelijk draait op dit toestel. */
+  var jsAlive = document.getElementById('js-alive');
+  if (jsAlive) { jsAlive.textContent = 'JavaScript werkt'; jsAlive.className = 'ok'; }
 
   /* --- Knoppen opbouwen -------------------------------------------- */
   FRAGMENTEN.forEach(function (frag, i) {
