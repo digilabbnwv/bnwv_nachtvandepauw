@@ -421,19 +421,30 @@
     }
   }
 
-  /* --- Audio ontgrendelen (iOS) ------------------------------------ */
-  function ontgrendel() {
+  /* --- Audio ontgrendelen (iOS) ------------------------------------
+     Safari op iPad vuurt niet altijd een 'click' af op een gewone <div>.
+     Daarom luisteren we op touch- én pointer-events, met een guard zodat
+     dubbel afvuren geen kwaad kan, plus een vangnet op document-niveau. */
+  function ontgrendel(e) {
+    if (e && e.preventDefault) { e.preventDefault(); }
+    if (ontgrendeld) { return; }
     ontgrendeld = true;
     unlockEl.classList.add('hidden');
     // Primen binnen de gebruikers-tik, zodat later afspelen is toegestaan.
     try {
-      audio.play().then(function () { audio.pause(); }).catch(function () {});
-    } catch (e) { /* stil negeren */ }
+      var p = audio.play();
+      if (p && p.then) { p.then(function () { audio.pause(); }).catch(function () {}); }
+    } catch (err) { /* stil negeren */ }
   }
-  unlockEl.addEventListener('click', ontgrendel);
-  unlockEl.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ' ') { ontgrendel(); }
+
+  ['touchend', 'pointerup', 'click'].forEach(function (ev) {
+    unlockEl.addEventListener(ev, ontgrendel, { passive: false });
   });
+  unlockEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { ontgrendel(e); }
+  });
+  // Vangnet: de allereerste aanraking waar dan ook ontgrendelt sowieso.
+  document.addEventListener('touchend', ontgrendel, { once: true, passive: false });
 
   /* --- Kiosk: dubbeltik-zoom volledig blokkeren -------------------- */
   document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
